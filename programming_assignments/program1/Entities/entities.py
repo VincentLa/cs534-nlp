@@ -1,5 +1,7 @@
 """
 Running by specifying the full path of files. For example,
+
+python3 /Users/vincela/git/cs534-nlp/programming_assignments/program1/Entities/entities.py /Users/vincela/git/cs534-nlp/programming_assignments/program1/Entities/trainE.txt /Users/vincela/git/cs534-nlp/programming_assignments/program1/Entities/testE.txt WORD CAP POS WORDCON
 """
 import argparse
 import os
