@@ -120,6 +120,7 @@ def write_feature_output(feature_vectors, labels, out_filename):
 
             word_feature_idxs = sorted(list(fv.keys()))
             for word_feature in word_feature_idxs:
+                indicator = int(fv[word_feature] >= 1)
                 outf.write(' {word_feature}:{count}'.format(
                     word_feature=word_feature,
                     count=fv[word_feature]))
