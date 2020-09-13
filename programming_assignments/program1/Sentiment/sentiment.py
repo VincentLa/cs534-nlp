@@ -161,10 +161,10 @@ def main():
     print(len(test_labels))
 
     print('Writing Training Feature Output')
-    write_feature_output(train_feature_vectors, train_labels, out_filename='train.txt.vector')
+    write_feature_output(train_feature_vectors, train_labels, out_filename='trainS.txt.vector')
 
     print('Writing Test Feature Output')
-    write_feature_output(test_feature_vectors, test_labels, out_filename='test.txt.vector')
+    write_feature_output(test_feature_vectors, test_labels, out_filename='testS.txt.vector')
 
 
 if __name__ == "__main__":
