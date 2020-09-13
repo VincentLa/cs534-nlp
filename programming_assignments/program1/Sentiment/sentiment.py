@@ -133,7 +133,6 @@ def main():
     """
     Create Feature Files
     """
-    print('hello world')
     args = get_args()
     train_file = args.train_file
     test_file = args.test_file
