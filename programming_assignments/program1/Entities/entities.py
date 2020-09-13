@@ -37,6 +37,27 @@ def get_args():
     return parser.parse_args()
 
 
+def get_line_count(fname):
+    """
+    Get Line count of file
+
+    https://stackoverflow.com/questions/845058/how-to-get-line-count-of-a-large-file-cheaply-in-python
+    """
+    with open(fname) as f:
+        for i, l in enumerate(f):
+            pass
+    return i
+
+
+def create_readable_features(doc):
+    """
+    Create Readable Features
+
+    Keyword Args:
+      - doc: Path to document
+    """
+
+
 def main():
     """
     Create Feature Files

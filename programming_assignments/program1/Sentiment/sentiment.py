@@ -66,6 +66,11 @@ def get_line_count(fname):
     return i
 
 
+def is_dict_empty(d):
+    """Check if dictionary is empty"""
+    return not bool(d)
+
+
 def create_feature_vectors(doc, words):
     """
     Create the feature vectors given doc and feature words
