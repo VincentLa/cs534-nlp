@@ -2,8 +2,8 @@
 Running by specifying the full path of files. For example,
 python3 /Users/vincela/git/cs534-nlp/programming_assignments/program1/Sentiment/sentiment.py /Users/vincela/git/cs534-nlp/programming_assignments/program1/Sentiment/trainS.txt /Users/vincela/git/cs534-nlp/programming_assignments/program1/Sentiment/testS.txt /Users/vincela/git/cs534-nlp/programming_assignments/program1/Sentiment/words.txt 4
 """
-
 import argparse
+import os
 
 
 HELP_TEXT = """
@@ -97,14 +97,36 @@ def create_feature_vectors(doc, words):
                 """
                 word_stripped = word.rstrip('\n')
                 if word_stripped in words:
-                    if word_stripped not in feature_vector_dict:
-                        feature_vector_dict[word_stripped] = 1
+                    word_stripped_idx = words.index(word_stripped) + 1  # The example in the assignment indicates 1 index (not 0)
+                    if word_stripped_idx not in feature_vector_dict:
+                        feature_vector_dict[word_stripped_idx] = 1
                     else:
-                        feature_vector_dict[word_stripped] += 1
+                        feature_vector_dict[word_stripped_idx] += 1
             prev_word = word
         return feature_vectors, labels
 
 
+def write_feature_output(feature_vectors, labels, out_filename):
+    """
+    Writing Feature output
+
+    Keyword Args:
+      feature_vectors: List of Dictionaries with feature counts
+      labels: List of labels
+    """
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), out_filename), 'w') as outf:
+        for idx, (fv, label) in enumerate(zip(feature_vectors, labels)):
+            outf.write('{label}'.format(label=label))
+
+            word_feature_idxs = sorted(list(fv.keys()))
+            for word_feature in word_feature_idxs:
+                outf.write(' {word_feature}:{count}'.format(
+                    word_feature=word_feature,
+                    count=fv[word_feature]))
+            if idx < len(labels) - 1:
+                """Don't write a new line if at the end"""
+                outf.write('\n')
+        
 
 def main():
     """
@@ -137,6 +159,12 @@ def main():
     print('Test features are:')
     print(len(test_feature_vectors))
     print(len(test_labels))
+
+    print('Writing Training Feature Output')
+    write_feature_output(train_feature_vectors, train_labels, out_filename='train.txt.vector')
+
+    print('Writing Test Feature Output')
+    write_feature_output(test_feature_vectors, test_labels, out_filename='test.txt.vector')
 
 
 if __name__ == "__main__":
