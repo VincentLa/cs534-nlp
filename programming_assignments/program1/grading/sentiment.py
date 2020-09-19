@@ -128,7 +128,7 @@ def write_feature_output(feature_vectors, labels, out_filename):
                 indicator = int(fv[word_feature] >= 1)
                 outf.write(' {word_feature}:{count}'.format(
                     word_feature=word_feature,
-                    count=fv[word_feature]))
+                    count=indicator))
             if idx < len(labels) - 1:
                 """Don't write a new line if at the end"""
                 outf.write('\n')
