@@ -188,6 +188,26 @@ def get_all_words_pos_in_doc(doc):
         return words, poss
 
 
+def get_label(label):
+    """
+    Return Label
+    """
+    if label == 'O':
+        return 0
+    elif label == 'B-PER':
+        return 1
+    elif label == 'I-PER':
+        return 2
+    elif label == 'B-LOC':
+        return 3
+    elif label == 'I-LOC':
+        return 4
+    elif label == 'B-ORG':
+        return 5
+    elif label == 'I-ORG':
+        return 6
+
+
 def create_readable_features(doc, ftypes, doc_type='train', train_words=None, train_pos=None):
     """
     Create Readable Features
@@ -213,6 +233,8 @@ def create_readable_features(doc, ftypes, doc_type='train', train_words=None, tr
                 label_pos_word_trimmed = label_pos_word.rstrip('\n')
                 label_pos_word_trimmed_split = label_pos_word_trimmed.split()
 
+                label = get_label(label_pos_word_trimmed_split[0])
+
                 word = label_pos_word_trimmed_split[2]
                 word_feature = get_word(label_pos_word_trimmed_split[2], doc_type=doc_type, train_words=train_words)
                 
@@ -225,12 +247,13 @@ def create_readable_features(doc, ftypes, doc_type='train', train_words=None, tr
                 poscon = get_poscon(sentence, idx, doc_type=doc_type, train_pos=train_pos)
                 
                 readable_features = {
+                    'LABEL': label,
                     'WORD': word_feature,
                     'POS': pos_feature,
                     'ABBR': abbr,
                     'CAP': cap,
                     'WORDCON': wordcon,
-                    'POSCON': poscon
+                    'POSCON': poscon,
                 }
                 readable_features_list.append(readable_features)
     return readable_features_list
@@ -254,6 +277,112 @@ def write_readable_features(readable_features, ftypes, out_filename):
             if idx < len(readable_features) - 1:
                 """Don't write a new line if at the end"""
                 outf.write('\n')
+
+
+def create_features(train_readable_features, ftypes):
+    """
+    Creating Features
+    """
+    word_features = []
+    pos_features = []
+    abbr_features = ['yes']
+    cap_features = ['yes']
+    wordcon_prev_features = []
+    wordcon_next_features = []
+    poscon_prev_features = []
+    poscon_next_features = []
+    feature_vectors = {}
+    for idx, sentence_dict in enumerate(train_readable_features):
+        for ftype in ftypes:
+            if ftype == 'WORD':
+                word_features.append(sentence_dict['WORD'])
+            if ftype == 'POS':
+                pos_features.append(sentence_dict['POS'])
+            if ftype == 'WORDCON':
+                wordcon_prev_features.append(sentence_dict['WORDCON'].split()[0])
+                wordcon_next_features.append(sentence_dict['WORDCON'].split()[1])
+            if ftype == 'POSCON':
+                poscon_prev_features.append(sentence_dict['POSCON'].split()[0])
+                poscon_next_features.append(sentence_dict['POSCON'].split()[1])
+    word_features = list(set(word_features))
+    word_features.append('UNK')
+
+    pos_features = list(set(pos_features))
+    pos_features.append('UNKPOS')
+
+    wordcon_prev_features = list(set(word_features))
+    wordcon_prev_features.append('UNK')
+    wordcon_prev_features.append('PHI')
+
+    wordcon_next_features = list(set(word_features))
+    wordcon_next_features.append('UNK')
+    wordcon_next_features.append('OMEGA')
+
+    poscon_prev_features = list(set(pos_features))
+    poscon_prev_features.append('UNKPOS')
+    poscon_prev_features.append('PHIPOS')
+
+    poscon_next_features = list(set(pos_features))
+    poscon_next_features.append('UNKPOS')
+    poscon_next_features.append('OMEGAPOS')
+
+    for ftype in ftypes:
+        if ftype == 'WORD':
+            feature_vectors[ftype] = word_features 
+        if ftype == 'POS':
+            feature_vectors[ftype] = pos_features
+        if ftype == 'ABBR':
+            feature_vectors[ftype] = abbr_features
+        if ftype == 'CAP':
+            feature_vectors[ftype] = cap_features
+        if ftype == 'WORDCON':
+            feature_vectors['WORDCON_PREV'] = wordcon_prev_features
+            feature_vectors['WORDCON_NEXT'] = wordcon_next_features
+        if ftype == 'POSCON':
+            feature_vectors['POSCON_PREV'] = poscon_prev_features
+            feature_vectors['POSCON_NEXT'] = poscon_next_features
+
+    return feature_vectors
+
+
+def write_feature_output(readable_features, feature_vectors, ftypes, out_filename):
+    """
+    Write Feature output
+    """
+    ftypes_full = []
+    for ftype in ftypes:
+        if ftype == 'WORDCON':
+            ftypes_full.append('WORDCON_PREV')
+            ftypes_full.append('WORDCON_NEXT')
+        elif ftype == 'POSCON':
+            ftypes_full.append('POSCON_PREV')
+            ftypes_full.append('POSCON_NEXT')
+        else:
+            ftypes_full.append(ftype)
+
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), out_filename), 'w') as outf:
+        for sentence_idx, sentence_dict in enumerate(readable_features):
+            # Writing Label
+            outf.write('{}'.format(sentence_dict['LABEL']))
+
+            # Go in order of ftypes
+            for idx, ftype in enumerate(ftypes_full):
+                if ftype not in ['WORDCON_PREV', 'WORDCON_NEXT', 'POSCON_PREV', 'POSCON_NEXT']:
+                    if sentence_dict[ftype] not in feature_vectors[ftype]:
+                        continue
+                    feature_id = feature_vectors[ftype].index(sentence_dict[ftype])
+                elif ftype == 'WORDCON_PREV':
+                    feature_id = feature_vectors[ftype].index(sentence_dict['WORDCON'].split()[0])
+                elif ftype == 'WORDCON_NEXT':
+                    feature_id = feature_vectors[ftype].index(sentence_dict['WORDCON'].split()[1])
+                elif ftype == 'POSCON_PREV':
+                    feature_id = feature_vectors[ftype].index(sentence_dict['POSCON'].split()[0])
+                elif ftype == 'POSCON_NEXT':
+                    feature_id = feature_vectors[ftype].index(sentence_dict['POSCON'].split()[1])
+                for i in range(0, idx):
+                    feature_id += len(feature_vectors[ftypes_full[i]])
+                outf.write(' {}:{}'.format(feature_id, 1))
+            outf.write('\n')
 
 
 def main():
@@ -285,6 +414,16 @@ def main():
 
     print('Writing readable features for test')
     write_readable_features(test_readable_features, ftypes, out_filename=os.path.basename(test_file) + '.readable')
+
+    print('Create Feature Vectors')
+    feature_vectors = create_features(train_readable_features, ftypes)
+
+    print('Writing feature output for train')
+    write_feature_output(train_readable_features, feature_vectors, ftypes, out_filename=os.path.basename(train_file) + '.vector')
+
+    print('Writing feature output for test')
+    write_feature_output(test_readable_features, feature_vectors, ftypes, out_filename=os.path.basename(test_file) + '.vector')
+
 
 if __name__ == "__main__":
     main()
