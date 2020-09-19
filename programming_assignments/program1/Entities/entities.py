@@ -381,6 +381,7 @@ def write_feature_output(readable_features, feature_vectors, ftypes, out_filenam
                     feature_id = feature_vectors[ftype].index(sentence_dict['POSCON'].split()[1])
                 for i in range(0, idx):
                     feature_id += len(feature_vectors[ftypes_full[i]])
+                feature_id += 1  # because we are 1 index not 0 index
                 outf.write(' {}:{}'.format(feature_id, 1))
             outf.write('\n')
 

@@ -31,3 +31,6 @@ Install python packages
 ```
 pip install -r requirements.txt
 ```
+
+## Cade Machine
+https://www.cade.utah.edu/faq/faq-ssh/
