@@ -1,0 +1,343 @@
+%-*- Mode:LaTeX; -*-      
+\documentclass[11pt]{article}
+\usepackage{vmargin}		% Force narrower margins
+\setpapersize{USletter}
+\setmarginsrb{1.0in}{1.0in}{1.0in}{0.6in}{0pt}{0pt}{0pt}{0.4in}
+\setlength{\parskip}{.1in}  % removed space between paragraphs
+\setlength{\parindent}{0in}
+
+\usepackage{epsfig}
+\usepackage{graphicx}
+\newcommand{\ra}{$\rightarrow$~}
+\newcommand{\dt}{$\circ$~}
+
+\begin{document}
+
+\large
+\begin{center}
+{\bf CS-5340/6340, Written Assignment \#2} \\
+{\bf DUE: Friday, September 25, 2020 by 11:59pm} \\ ~ \\
+{\bf  Submit your assignment on CANVAS in pdf format.}
+\end{center}
+\normalsize
+
+\begin{enumerate}  
+
+%% ===============================================================
+% QUESTION #1 : Smoothing
+%% =============================================================
+
+\item (12 pts) The table below contains frequency values for a set of
+  nouns referring to trees in an imaginary text corpus. Fill in the table
+  below with the unsmoothed probability of each noun, as well as the smoothed
+  frequency and smoothed probability of each noun using {\bf add-k
+  smoothing} with $k$=3.  You should assume that the vocabulary consists only of
+  the nouns listed below.
+
+  {\bf IMPORTANT: Please show the fraction (numerator/denominator)
+    used to compute each value  as well as the final value (e.g., 2/4 = .50).} \\
+
+\begin{center}
+\begin{tabular}{|l|c|c||c|c|} \hline
+{\bf NOUN} & {\bf FREQ} & {\bf UNSMOOTHED} & {\bf SMOOTHED} & {\bf SMOOTHED} \\
+~ & ~ & {\bf PROB} & {\bf FREQ} & {\bf PROB} \\ \hline
+pine & 300 & ~ & ~ & ~ \\ \hline
+oak & 96 & ~ & ~ & ~ \\ \hline
+spruce & 4  & ~ & ~ & ~ \\ \hline
+cottonwood & 0  & ~ & ~ & ~ \\ \hline
+\end{tabular}
+\end{center}
+
+
+\newpage
+%% ===============================================================
+% QUESTION #2 : Probabilities
+%% =============================================================
+
+\item (28 pts) Assume that a part-of-speech (POS) tagger has been applied to the
+sentence below with the following results:
+
+\begin{quote}
+{\bf Bob}/{\sc noun~} {\bf put}/{\sc verb~} {\bf the}/{\sc art~}  {\bf blue}/{\sc adj~}
+{\bf light}/{\sc noun~}  {\bf bulb}/{\sc noun~} {\bf in}/{\sc prep~}
+{\bf the}/{\sc art~} \\
+{\bf light}/{\sc adj~}  {\bf orange}/{\sc adj~}   {\bf lamp}/{\sc noun~}  
+{\bf to}/{\sc inf~} {\bf light}/{\sc verb~} 
+{\bf the}/{\sc art~} {\bf blue}/{\sc adj~} \\
+  {\bf and}/{\sc conj~} {\bf
+  orange}/{\sc adj~}  {\bf room}/{\sc noun~} 
+{\bf with}/{\sc prep~} {\bf blue}/{\sc adj~}  {\bf light}/{\sc noun~}
+{\bf !}/{\sc punc}
+\end{quote}
+\vspace*{.1in}
+
+Fill in the table below with the probabilities that you would estimate
+based on the sentence above. {\bf Leave your results in fractional
+  form (e.g., 5/5)!}  If a probability would be undefined (i.e.,
+have a zero denominator), then answer UNDEFINED. 
+
+\vspace*{.1in}
+We define the various types of probabilities as follows, where $w_i$
+indicates a word and $t_i$ indicates a POS tag. 
+
+\begin{itemize}
+\item $P(w_i)$ means probability of word $w_i$
+\item $P(w_i~w_j)$ means probability of the bigram $w_i$ $w_j$ . Do not use $\phi$ for this computation.
+\item $P(t_i)$ means probability of POS tag $t_i$
+\item $P(t_i~t_j)$ means probability of the bigram $t_i$ $t_j$ . Do not use $\phi$ for this computation.
+\item $P(w_i \mid w_{i-1})$ means probability of word   $w_i$   following word $w_{i-1}$
+\item$P(w_i \mid w_{i-2}~w_{i-1})$ means probability of word $w_i$  following words $w_{i-2}$ $w_{i-1}$ 
+\item$P(t_i \mid t_{i-1})$ means probability of POS  tag $t_i$ following POS tag $t_{i-1}$
+\item$P(t_i \mid t_{i-2}~t_{i-1})$ means probability of word $t_i$ following words $t_{i-2}$ $t_{i-1}$
+\item$P(w_i \mid t_i)$ means  probability of word $w_i$ given tag $t_i$.
+\item$P(t_i \mid w_i)$ means  probability of word $t_i$ given tag $w_i$.
+\end{itemize}
+
+ \begin{center}
+ \begin{tabular}{|l|l|} \hline
+ \textbf{Probability~~~~~~~~~~~~~~~} & \textbf{Value~~~~~~~~~~~~~~~~~} \\ \hline
+ $P$(light) & ~ \\ \hline
+ $P$(blue light) & ~ \\ \hline
+ $P$(ADJ) & \\ \hline
+ $P$(ADJ NOUN) & ~ \\ \hline
+ $P$(light $\mid$ blue) & ~ \\ \hline
+ $P$(in $\mid$ the) & ~ \\ \hline
+ $P$(light $\mid$ the blue) & ~ \\ \hline
+ $P$(NOUN $\mid$ VERB) & ~ \\ \hline
+ $P$(CONJ $\mid$ ADJ) & ~ \\ \hline
+ $P$(ADJ $\mid$ VERB ART) & ~ \\ \hline
+ $P$(orange $\mid$ ADJ) & ~ \\  \hline
+ $P$(light $\mid$ VERB) & ~ \\ \hline
+ $P$(NOUN $\mid$ light) & ~ \\ \hline
+ $P$(VERB $\mid$ put) & ~ \\ \hline
+ \end{tabular}
+ \end{center}
+
+
+
+
+
+\newpage
+%% ===============================================================
+% QUESTION #3 : Viterbi
+%% =============================================================
+
+\item (30 pts) Use the following tables of probabilities 
+to answer this question. Note that these numbers are completely
+fictional and do not necessarily add up logically (i.e., sum to 1
+where they should), but don't worry about that, just use them as they
+are. 
+
+
+\begin{center}
+\begin{tabular}{|lr|} \hline
+P(light $\mid$ NOUN) & .20 \\ \hline
+P(light $\mid$ VERB) & .60 \\ \hline
+P(light $\mid$ ADJ) & .35 \\ \hline
+P(shows $\mid$ NOUN) & .10 \\ \hline
+P(shows $\mid$ VERB) & .45 \\ \hline
+P(shows $\mid$ ADJ) & .07 \\ \hline
+\end{tabular}
+\hspace*{.5in}
+\begin{tabular}{|lr|} \hline
+P(NOUN $\mid$ $\phi$) & .50 \\ \hline
+P(VERB $\mid$ $\phi$) & .35 \\ \hline
+P(ADJ $\mid$ $\phi$) & .25 \\ \hline
+P(NOUN $\mid$ NOUN) & .40 \\ \hline
+P(NOUN $\mid$ VERB) & .15 \\ \hline
+P(NOUN $\mid$ ADJ) & .70\\ \hline
+P(VERB $\mid$ NOUN) & .60 \\ \hline
+P(VERB $\mid$ VERB) & .05 \\ \hline
+P(VERB $\mid$ ADJ) & .01 \\ \hline
+P(ADJ $\mid$ NOUN) & .03 \\ \hline
+P(ADJ $\mid$ VERB) & .20 \\ \hline
+P(ADJ $\mid$ ADJ) & .08\\ \hline
+\end{tabular}
+\end{center}
+
+Assume that there are only 3 possible part-of-speech tags: NOUN, VERB,
+and ADJ. The following network would be used by the Viterbi algorithm
+to find the most likely sequence of POS tags for the sentence {\it ``Light
+  shows''}: 
+
+\vspace*{.2in}
+\hspace*{.5in} \psfig{figure=viterbi-lightshows.eps,height=2in}
+\vspace*{.2in}
+
+
+\newpage
+
+Using the Viterbi algorithm, compute the probability for each of the
+following nodes in the network. Show all your work! \\
+
+\begin{itemize}
+
+\item P(light=VERB)  \\
+
+\item P(light=NOUN)  \\
+
+\item P(light=ADJ) \\
+
+\item P(shows=VERB) \\
+
+\item P(shows=NOUN) \\
+
+\item P(shows=ADJ) \\ ~ \\
+
+
+\hspace*{-.5in}
+Compute the following forward probabilities.  Show all your work! \\
+
+\item $\alpha_{shows}(NOUN)$ \\
+\item $\alpha_{shows}(VERB)$ \\
+\item $\alpha_{shows}(ADJ)$ \\ ~ \\
+
+
+\hspace*{-.5in} Compute the following normalized probability
+values. Show all  your work! \\
+
+\item P(shows/NOUN $\mid$ light) \\
+\item P(shows/VERB $\mid$ light) \\
+\item P(shows/ADJ $\mid$ light) \\
+\end{itemize}
+
+
+\newpage
+%% ===============================================================
+% QUESTION #4 : Statistical POS Tagging models
+%% =============================================================
+
+\item (12 pts) Consider the following quote from Shakespeare, with
+  assigned part-of-speech (POS) tags:
+\begin{center}
+{\bf Brevity}/{\sc noun~} {\bf is}/{\sc verb~} {\bf the}/{\sc art~} {\bf
+  soul}/{\sc noun~} {\bf of}/{\sc prep~} {\bf wit}/{\sc noun}
+\end{center}
+
+Show the equation that you would use for statistical POS tagging to compute P({\sc noun verb art
+  noun prep noun} $\mid$ {\bf Brevity is the soul of wit}) for each of the
+N-gram models listed below. You do \underline{not} need to include any
+numbers at all. Just show the equations that you would use with the
+specific words and POS tags for this quote plugged into each
+equation. \\
+
+\begin{enumerate}
+
+\item Unigram model \\
+
+\item Bigram model \\
+
+\item Trigram model \\
+
+\end{enumerate}
+
+
+
+
+\newpage
+%% ===============================================================
+% QUESTION #5 : BIO Labeling
+%% =============================================================
+
+\item (6 pts) Use the BIO labeling scheme to identify the simple
+  (base) noun phrases (NPs) in the sentence below. Each word should be
+  assigned one of the labels {\bf B} (for Beginning of a NP), {\bf I}
+  (for Inside a NP), or {\bf O} (for Outside a NP).  \\
+
+\begin{quote}
+{\bf In November Salt Lake City typically receives only a little snowfall but people
+ often tell their children wild tales about giant blizzards}
+\end{quote}
+
+
+
+
+\newpage
+%% ===============================================================
+% QUESTION #6 : Grammars & FSMs
+%% =============================================================
+
+\item (12 pts) Consider the three finite-state machines (FSMs) below, which
+  recognize sequences of part-of-speech (POS) tags. Assume that the
+  states labeled VP and NP are the initial states for FSMs that are
+  designed to recognize Verb Phrases and Noun Phrases, respectively,
+  and that the states with an extra circle around them are accepting
+  states. For (b), the first edge labeled ``art, adj'' can be
+  traversed by \underline{either} an ``art'' or an ``adj''., 
+
+ \begin{center}
+ \psfig{figure=new-fsms.eps,height=4in}
+ \end{center}
+\vspace*{.1in}
+
+
+\begin{itemize}
+
+\item Write a Verb Phrase (VP) grammar that accepts exactly same set
+  of POS tag sequences as the FSM labeled (a) above.  \\
+
+\item Write a Noun Phrase (NP) grammar that accepts exactly same set
+  of POS tag sequences as the FSM labeled (b) above.  \\
+
+\item Write a Verb Phrase (VP) grammar that accepts exactly same set
+  of POS tag sequences as the FSM labeled (c) above.  \\
+
+\end{itemize}
+
+
+
+\newpage
+%% ===============================================================
+% QUESTION #6:   CS-6340 ONLY!
+%% ================================================================
+
+\underline{\textbf{Question \#7 is for CS-6340 students ONLY!}}  \\
+
+\item (12 pts) Consider the following four context-free grammars to
+  recognize Noun Phrases (NPs):
+
+\begin{center}
+\begin{tabular}{|l|l|l|l|} \hline
+{\bf G1} & {\bf G2} & {\bf G3} & {\bf G4} \\ \hline
+NP \ra art NP1   & NP \ra art X    & NP \ra NP7         & NP \ra art W \\
+NP \ra NP1       & NP \ra adj X    & NP \ra art NP6     & NP \ra W \\
+NP1 \ra adj NP1  & NP \ra Y        & NP \ra adj NP6     & W \ra adj noun \\
+NP1 \ra NP2      & X \ra adj X     & NP \ra art adj NP6 & W \ra adj W \\
+NP2 \ra noun     & X \ra Y         & NP6 \ra NP7        & W \ra Z \\
+NP2 \ra noun NP2 & Y \ra noun      & NP7 \ra noun NP7   & Z \ra noun Z \\
+~                & Y \ra noun noun & NP7 \ra noun       & Z \ra noun \\
+~                & Y \ra noun Y    & ~                  & ~        \\ \hline
+\end{tabular}
+\end{center}
+
+\vspace*{.2in}
+For each grammar, write a regular expression that accepts
+exactly the same NP language as the grammar. That is, the regular
+expression should recognize exactly the same set of part-of-speech tag
+sequences as the grammar.
+
+You can use the Kleene star (*) operator, which means 0 or more
+instances, as well as the + operator, which means 1 or more
+instances. For example, $verb^{*}$ means a sequence of $\geq$ 0 verbs,
+and $verb^{+}$ means a sequence of $\geq$ 1 verbs. You can also use
+$\epsilon$ to represent the empty string, if you wish. 
+
+\begin{itemize}
+
+\item G1
+\vspace*{.2in}
+
+\item G2
+\vspace*{.2in}
+
+\item G3
+\vspace*{.2in}
+
+\item G4
+\vspace*{.2in}
+
+\end{itemize}
+
+
+
+\end{enumerate}
